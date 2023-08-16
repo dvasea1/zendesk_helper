@@ -166,7 +166,7 @@ class ZendeskHelper : FlutterPlugin, MethodCallHandler, ActivityAware {
         val token = call.argument<String>("token") ?: ""
 
 
-        val pushProvider: PushNotificationsProvider = Chat.INSTANCE.providers()?.pushNotificationsProvider()
+        val pushProvider = Chat.INSTANCE.providers()?.pushNotificationsProvider()
 
         if (pushProvider != null) {
             pushProvider.registerPushToken(token)
