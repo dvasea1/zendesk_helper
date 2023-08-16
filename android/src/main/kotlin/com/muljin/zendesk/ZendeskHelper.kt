@@ -65,6 +65,11 @@ class ZendeskHelper : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(true)
                 }
 
+                "setFirebaseToken" -> {
+                    setFirebaseToken(call)
+                    result.success(true)
+                }
+
                 "startChat" -> {
                     startChat(call)
                     result.success(true)
@@ -118,7 +123,7 @@ class ZendeskHelper : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
 
                     override fun error(
-                            errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                        errorCode: String, errorMessage: String?, errorDetails: Any?) {
                         jwtCompletion.onError()
                     }
 
@@ -149,12 +154,23 @@ class ZendeskHelper : FlutterPlugin, MethodCallHandler, ActivityAware {
         val chatProvider = Chat.INSTANCE.providers()?.chatProvider()
 
         val visitorInfo = VisitorInfo.builder()
-                .withName(name)
-                .withEmail(email)
-                .withPhoneNumber(phoneNumber) // numeric string
-                .build()
+            .withName(name)
+            .withEmail(email)
+            .withPhoneNumber(phoneNumber) // numeric string
+            .build()
         profileProvider?.setVisitorInfo(visitorInfo, null)
         chatProvider?.setDepartment(department, null)
+    }
+
+    private fun setFirebaseToken(call: MethodCall) {
+        val token = call.argument<String>("token") ?: ""
+
+
+        val pushProvider: PushNotificationsProvider = Chat.INSTANCE.providers().pushNotificationsProvider()
+
+        if (pushProvider != null) {
+            pushProvider.registerPushToken(token)
+        }
     }
 
     private fun addTags(call: MethodCall) {
@@ -172,25 +188,25 @@ class ZendeskHelper : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun startChat(call: MethodCall) {
         val isPreChatFormEnabled = call.argument<Boolean>("isPreChatFormEnabled") ?: true
         val isAgentAvailabilityEnabled = call.argument<Boolean>("isAgentAvailabilityEnabled")
-                ?: true
+            ?: true
         val isChatTranscriptPromptEnabled = call.argument<Boolean>("isChatTranscriptPromptEnabled")
-                ?: true
+            ?: true
         val toolbarTitle = call.argument<String>("toolbarTitle")!!
         val isOfflineFormEnabled = call.argument<Boolean>("isOfflineFormEnabled") ?: true
 
         val chatConfigurationBuilder = ChatConfiguration.builder()
         chatConfigurationBuilder
-                .withAgentAvailabilityEnabled(isAgentAvailabilityEnabled)
-                .withTranscriptEnabled(isChatTranscriptPromptEnabled)
-                .withOfflineFormEnabled(isOfflineFormEnabled)
-                .withPreChatFormEnabled(isPreChatFormEnabled)
-                .withChatMenuActions(ChatMenuAction.END_CHAT)
+            .withAgentAvailabilityEnabled(isAgentAvailabilityEnabled)
+            .withTranscriptEnabled(isChatTranscriptPromptEnabled)
+            .withOfflineFormEnabled(isOfflineFormEnabled)
+            .withPreChatFormEnabled(isPreChatFormEnabled)
+            .withChatMenuActions(ChatMenuAction.END_CHAT)
         val chatConfiguration = chatConfigurationBuilder.build()
 
         MessagingActivity.builder()
-                .withToolbarTitle(toolbarTitle)
-                .withEngines(ChatEngine.engine())
-                .show(activity, chatConfiguration)
+            .withToolbarTitle(toolbarTitle)
+            .withEngines(ChatEngine.engine())
+            .show(activity, chatConfiguration)
 
     }
 }

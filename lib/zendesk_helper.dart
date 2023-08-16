@@ -19,7 +19,7 @@ class Zendesk {
     required Future<String> Function() getJwtToken,
   }) async {
     _channel.setMethodCallHandler(
-      (call) async => call.method == 'getJwt' ? await getJwtToken() : null,
+          (call) async => call.method == 'getJwt' ? await getJwtToken() : null,
     );
     await _channel.invokeMethod<void>('initialize', {
       'accountKey': accountKey,
@@ -100,5 +100,9 @@ class Zendesk {
   /// Sends a new text message and updates the local chat logs.
   Future<void> sendMessage(String message) async {
     await _channel.invokeMethod<void>('sendMessage', {'message': message});
+  }
+
+  Future<void> setFirebaseToken(String token) async {
+    await _channel.invokeMethod<void>('setFirebaseToken', {'token': token});
   }
 }
